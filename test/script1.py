@@ -2,7 +2,7 @@
 
 def doit():
     print 'hello'
-    print 'hello again'
+    print 'hello from Grant'
 
 if __name__ == "__main__":
     doit()
