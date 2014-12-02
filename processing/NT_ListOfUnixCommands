@@ -1,0 +1,35 @@
+#List of Unix commands
+
+chmod a+x 'nameof script' 	#give file write and execute permissions to ALL users
+
+tar -cvf filename.tar.gz ./	# zips up all files in directory
+
+tar -cvf filename.tar.gz -T list.txt # zips up all files in a list
+
+unzip -a file.zip		#unzips a zip file to current dir
+
+ps -ef | grep barnetj		# list of my jobs at point in time
+
+top				#list of all jobs on queue
+
+kill - 9 job number 		# kill the job from the job list
+
+cat ~/.bash_history.athen2|grep 'some text'	#search history for a string or command
+
+nohup 'command' >&log.log&	#run job and put to background with errors / messages to log.log file
+
+mv $(cat filelist.txt) ./temp 	#move all files in a list to another directory
+
+gedit 				#text editor
+
+ls -R | grep .img > filelist.txt #creates a list of .img in folder
+
+lftp ftp-dlrm.nt.gov.au -u dlrmadmin #ftp commands
+	
+	password: nature
+	cd incmong or outgoing
+	mput or mget
+
+du -h size of files or folder in megabytes
+
+

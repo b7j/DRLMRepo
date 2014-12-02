@@ -78,7 +78,7 @@ def fracAnalysis(result):
 
     pV1 = summed[9] + summed[10] + summed[11] + summed[12] + summed[13] + summed[14] + summed[26]
 
-    npV1 = summed[1] + summed[2] + summed[2] + summed[4] + summed[5] + summed[6] + summed[7] + summed[23] + summed[30]
+    npV1 = summed[1] + summed[2] + summed[3] + summed[4] + summed[5] + summed[6] + summed[7] + summed[23] + summed[30]
 
     bal =  summed[2] + summed[3] + summed[4] + summed[5] + summed[6] + summed[7] + summed[30] + summed[34] + summed[35] # Brown Attached Leaf
 
