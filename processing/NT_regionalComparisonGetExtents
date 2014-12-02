@@ -1,0 +1,12 @@
+projwin="30884.787130 -2480815.588026 86385.543772 -2537210.389995"
+
+for img in $(find /apollo/imagery/rsc/landsat/mosaics/nt -name "*dima2.tif")
+do
+outimg=$(basename $img)
+outimg=${outimg/nt/brunettte_downs}
+outimg=${outimg/.tif/.img}
+gdal_translate -of HFA \
+   -projwin $projwin \
+   $img \
+   $outimg
+done
