@@ -15,6 +15,12 @@ import matplotlib.pyplot as plt
 
 from matplotlib.gridspec import GridSpec
 
+import matplotlib.colors as colors
+
+from pylab import *
+
+from time import gmtime, strftime
+
 
 
 
@@ -44,13 +50,6 @@ def getCmdargs():
     return cmdargs
  
 
-
-
-
-
-
- 
-
  
 # Set up the function to be applied
 def doCounts(filename,vec,uid):
@@ -65,6 +64,8 @@ def doCounts(filename,vec,uid):
         i = i+1
 
         print i
+
+        print strftime("%H:%M:%S", gmtime())
 
         sample = str(i) + ',' + str(i)
 
@@ -90,7 +91,8 @@ def doCounts(filename,vec,uid):
   
  
     
-    
+    #pdb.set_trace()
+
     return allCounts
 
 def doTotals(ranks):
@@ -109,15 +111,13 @@ def doTotals(ranks):
 
         for i in range(len(rank)):
 
-           if i > 0:
+           a = rank[i]
 
-              a = rank[i]
+           districts.append(a[0])
 
-              districts.append(a[0])
+           distCounts.append(a[1])
 
-              distCounts.append(a[1])
-
-              distNulls.append(a[2])
+           distNulls.append(a[2])
 
         row = [districts,distCounts,distNulls]
 
@@ -129,8 +129,7 @@ def doTotals(ranks):
 
 def sendToOutput(data,fileName):
 
-
-
+   
     files = open(fileName, "w")
     
     for row in data:
@@ -161,9 +160,9 @@ def doCalcs(totals):
 
     
 
-    countArray = np.zeros((rowSize,colSize)) # array with columns as shapefile features & rows as ranks
+    countArray = np.zeros((rowSize + 1,colSize)) # array with columns as shapefile features & rows as ranks
 
-    nullArray = np.zeros((rowSize,colSize)) # array with columns as shapefile features & rows as ranks
+    nullArray = np.zeros((rowSize + 1,colSize)) # array with columns as shapefile features & rows as ranks
 
     #loop through and get out counts and nulls for each feature (region / district)
 
@@ -185,59 +184,59 @@ def doCalcs(totals):
 
     # loop though array and sum up counts and arrays for each district
 
+    #pdb.set_trace()
+
+    countArray[10,:] = nulls # note: this bit add the null count to the end of the array
+
     countSums = []
 
-    nullSums = []
-
-    
+          
     for i in range(colSize):
 
         countSums.append(np.sum(countArray[:,i]))
 
-        nullSums.append(np.sum(nullArray[:,i]))
+       
     
     
    
     #area calculations
 
-    #pdb.set_trace()
+   # pdb.set_trace()
 
     countSqm = countArray * 900
 
-    nullSqm = nullArray * 900
-
     countSqKm = countSqm / 1000000
-
-    nullSqKm = nullSqm / 1000000
 
     
 
     #proportions
-
     countDivision = countArray / countSums
 
     countProportion = countDivision * 100
 
-    nullDivision = nullArray / nullSums
+  
 
-    nullProportion = nullDivision * 100
+    return countSqKm, countProportion
 
-    return countSqKm, nullSqKm, countProportion, nullProportion
 
-def plotting(countSqKm, nullSqKm, countProportion, nullProportion,fieldVals):
+
+
+
+
+
+def plotting(countSqKm,countProportion,fieldVals):
 
 
     #loop through each district and plot
-
-    pdb.set_trace()
-
-    size = countProportion.shape
+    
+    size = countSqKm.shape
 
     
 
+        
     for i in range(size[1]):
 
-        
+           
 
         countProps = countProportion[:,i]
 
@@ -247,7 +246,7 @@ def plotting(countSqKm, nullSqKm, countProportion, nullProportion,fieldVals):
 
         ba = countProps[2]
 
-        av = countProps[3:6]
+        av = countProps[3:7]
 
         av = np.sum(av)
 
@@ -256,21 +255,42 @@ def plotting(countSqKm, nullSqKm, countProportion, nullProportion,fieldVals):
         vmaa = countProps[8]
 
         highest = countProps[9]
-    
-        explode=(0, 0.05, 0, 0)
+
+        nulls = countProps[10]
+
+        #figure(1, figsize=(5,5))
+        
+        #ax = axes([0.1, 0.1, 0.8, 0.8])
+          
+        explode=(0.05,0.05,0.05,0.05,0.05,0.05,0.05)
 
         catergories = [lowest,vmba,ba,av,abv,vmaa,highest]
 
-        labels = ['Lowest','Very much below average','Below average','Average', 'Above average', 'Very much above average', 'Highest']
+         
+        matplotlib.rcParams.update({'font.size': 10}) 
 
-        theGrid = GridSpec(2, 2)
+        labels = ['Lowest '+ str(round(lowest,1))+ '%','Very much below average '+ str(round(vmba,1)) + '%','Below average '+ str(round(ba,1))+ '%','Average '+ str(round(av,1)) + '%',
+                 'Above average '+ str(round(abv,1)) + '%', 'Very much above average '+ str(round(vmaa,1)) + '%', 'Highest '+ str(round(highest,1)) + '%']
+
+        theGrid = GridSpec(1,1)
+
+        colours = ['red','orange','yellow','lightgray','lime','darkgreen','blue']
 
         plt.subplot(theGrid[0, 0], aspect=1)
 
-        plt.pie(catergories, labels=labels, autopct='%1.1f%%', shadow=True)
+        
+        plt.subplots_adjust(left=0.05, right=0.85) 
 
-        plt.show()
+        #pdb.set_trace()
 
+        plt.pie(catergories, labels=labels, colors = colours, explode = explode)
+
+        
+        #pdb.set_trace()
+
+        plt.savefig(fieldVals[i] + '.png', dpi = 600)
+
+    #pdb.set_trace()
         
 
 def getShapeNames(filename,fieldname):
@@ -302,29 +322,27 @@ def getShapeNames(filename,fieldname):
 
 
 
-
-
-
-
 def mainRoutine():
 
     cmdargs = getCmdargs() # instantiate the get command line function
 
-    
+    #fieldVals = getShapeNames(cmdargs.inputVector,cmdargs.fieldName)
 
     results = doCounts(cmdargs.inputImage, cmdargs.inputVector, cmdargs.uid)
 
-    totals = doTotals(results)
+    #pdb.set_trace()
 
     fileName = cmdargs.outputfile
 
     sendToOutput(results,fileName)
+
+    totals = doTotals(results)
  
-    countSqKm, nullSqKm, countProportion,nullProportion = doCalcs(totals)
+    countSqKm,countProportion = doCalcs(totals)
 
     fieldVals = getShapeNames(cmdargs.inputVector,cmdargs.fieldName)
 
-    plotting(countSqKm, nullSqKm, countProportion,nullProportion,fieldVals)
+    plotting(countSqKm,countProportion,fieldVals)
 
     
 
