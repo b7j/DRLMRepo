@@ -213,7 +213,7 @@ def gettransectdata(tdata):
 
         elif mB[i] == 1:
 
-            mid = ' mid branch'
+            mid = 'mid branch'
 
         elif mGl[i] == 0 or not mGl[i] == True and mDl[i] == 0 or not mDl[i] == True and mB[i] == 0 or not mB[i] == True:
 
