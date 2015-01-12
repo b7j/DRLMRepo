@@ -115,6 +115,8 @@ def woodyCoverAnalysis(result,branch):
 
     ccStage1 = []
 
+    #loop through the matrix add up each woody component
+
     for i in range(row):
 
         a = result[i,:]
@@ -131,7 +133,7 @@ def woodyCoverAnalysis(result,branch):
 
         ccStage1.append(d)
 
-    
+    #Next is to replace all the zero intercepts for each woody component and replace with a 1 for the purpose of removing from the total sum
 
     fpcStage2 = []
 
@@ -160,7 +162,7 @@ def woodyCoverAnalysis(result,branch):
            ccStage2.append(1)
 
 
-    #pdb.set_trace()
+   #sum all the zero hits together
 
     sumFpc = sum(fpcStage2)
 
@@ -168,6 +170,7 @@ def woodyCoverAnalysis(result,branch):
 
     sumCc = sum(ccStage2)
 
+    #final calculation of each woody component allowing for over topping.
 
     fpc1 = 100 - sumFpc # 
 
