@@ -87,9 +87,22 @@ def analysis(data,oldVals,newVals):
 
             intercepts = data.row_values(i,7,107) # get all the intercept row by row
 
+            #pdb.set_trace()
             siteDetails = data.row_values(i,0,7) # get all the site details
 
-            allSites.append(siteDetails)
+            lat = str(siteDetails[0])
+
+            longt = str(siteDetails[1])
+
+            date = str(siteDetails[2])
+
+            siteId = siteDetails[3]
+
+            trans = siteDetails[6]
+
+            aa = lat + ';' + longt + ';' + date + ';' + siteId + ';'+ trans
+
+            allSites.append(aa)
 
             
             interceptOutput = []
@@ -134,17 +147,23 @@ def getLookUp(data):
 
 
 
-def sendToOutput(data,fileName):
+def sendToOutput(siteData,trans,fileName):
 
     files = open(fileName, "w")
 
     #pdb.set_trace()
 
-    for i in data:
+    for i in range(len(siteData)):
 
-        ii = str(i)      
+        a = siteData[i]
+
+        b = trans[i]
+
+        c = a + ';' + b
+
+        #ii = str(i)      
         
-        files.write(ii + '\n')
+        files.write(c + '\n')
 
     files.close()
 
@@ -181,14 +200,16 @@ def mainRoutine():
     transectOutput, siteDetails = analysis(data,oldVals,newVals)
 
     
+
+    
        
     #pdb.set_trace()
 
     fileName = cmdargs.outputfile
 
-    sendToOutput(transectOutput,'transects2411.txt')
+    sendToOutput(siteDetails,transectOutput,fileName)
 
-    sendToOutput(siteDetails,'siteDetails2411.txt')
+    
 
     
 
