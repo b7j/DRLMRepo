@@ -2,6 +2,7 @@
 
 '''
 This is a a scrit to import data from ipad 'Rangelands proforma v4.3.xls' asat June2014, prior to refit of fraction lookup to include woody regrowth as discussed in darwin june 13
+Note: this version loops through a directory containing xls files and outputs in one txt file.
 
 '''
 import xlrd
@@ -14,6 +15,9 @@ import math
 
 import csv
 
+import glob
+
+
 
 
 #function to get cmd line inputs
@@ -21,13 +25,13 @@ def getCmdargs():
 
     p = argparse.ArgumentParser()
 
-    p.add_argument("--inputxlfile", help="Input xl file from Ipad")
+    p.add_argument("--inputdir", help="Input directory containing xl files from ipad")
 
     p.add_argument("--outputfile", help="output txt file")
 
     cmdargs = p.parse_args()
     
-    if cmdargs.inputxlfile is None:
+    if cmdargs.inputdir is None:
 
         p.print_help()
 
@@ -91,6 +95,8 @@ def utmToLatLng(zone, easting, northing, northernHemisphere=False):
 
 def getSiteDetails(siteDetails,workbook):
 
+    #pdb.set_trace()
+
     centrePointEasting = float(siteDetails.cell_value(12,1))
      
     centrePointNorthing = float(siteDetails.cell_value(13,1))
@@ -99,8 +105,12 @@ def getSiteDetails(siteDetails,workbook):
     
     date = siteDetails.cell_value(9,1)
 
+    print str(date)
+  
+
     year, month, day, hour, minute, second = xlrd.xldate_as_tuple(date, workbook.datemode)
 
+    
     date = str(day)+'/'+str(month)+'/'+str(year)
     
     observer = siteDetails.cell_value(4,1)
@@ -132,7 +142,7 @@ def sendToOutput(lat,longt,date,siteID,observer,recorder,transectID,ground,woody
 
     
 
-    aa = str(lat) + ';' + str(longt) + ';' + date + ';' + siteID + ';' + observer + ';' + recorder + ';' + transectID + ';'
+    aa = str(lat) + ';' + str(longt) + ';' + date + ';' + siteID + ';' + observer + ';' + recorder + ';' + transectID
     
     transect = []
 
@@ -175,47 +185,68 @@ def mainRoutine():
 
     cmdargs = getCmdargs() # instantiate the get command line function
 
-    aa = cmdargs.inputxlfile
-
-    workbook = xlrd.open_workbook(aa)
-
-    worksheets = workbook.sheet_names()
-
-    siteDetailSheet = workbook.sheet_by_name(worksheets[0])
-    
-    transectNSSheet = workbook.sheet_by_name(worksheets[3])
-
-    transectSENWSheet = workbook.sheet_by_name(worksheets[4])
-
-    transectNESWSheet = workbook.sheet_by_name(worksheets[5])
-
-    basalSheet = workbook.sheet_by_name(worksheets[6])
-
-    latitude, longitude, date, observer, recorder, siteid = getSiteDetails(siteDetailSheet,workbook)
-
-    glns, wdns, ulns, mlns = gettransectdata(transectNSSheet)
-
-    glse, wdse, ulse, mlse = gettransectdata(transectSENWSheet)
-
-    glne, wdne, ulne, mlne = gettransectdata(transectNESWSheet)
+    directory = cmdargs.inputdir
 
     #pdb.set_trace()
 
+    pattern = "%s/*.xls" % directory # create a file stage pattern to search for.
+
+    filelist = glob.glob(pattern)# filter the image directory for the chosen stage
+
+    filelist.sort(key=lambda x: x.split("_", 2)[-1]) # sort the filtered list on filename
+
     output = []
 
-    northSouth = sendToOutput(latitude,longitude,date,siteid,observer,recorder,worksheets[3],glns,wdns,mlns,ulns)
+    #pdb.set_trace()
 
-    output.append(northSouth)
+    for i in filelist:
 
-    southEast = sendToOutput(latitude,longitude,date,siteid,observer,recorder,worksheets[4],glse,wdse,mlse,ulse)
-    
-    output.append(southEast)
+          print i
 
-    northEast = sendToOutput(latitude,longitude,date,siteid,observer,recorder,worksheets[5],glne,wdne,mlne,ulne)
-    
-    output.append(northEast)
+          
+          workbook = xlrd.open_workbook(i)
+
+          worksheets = workbook.sheet_names()
+
+          siteDetailSheet = workbook.sheet_by_name(worksheets[0])
+
+                 
+          transectNSSheet = workbook.sheet_by_name(worksheets[3])
+
+          transectSENWSheet = workbook.sheet_by_name(worksheets[4])
+
+          transectNESWSheet = workbook.sheet_by_name(worksheets[5])
+
+          #basalSheet = workbook.sheet_by_name(worksheets[6])
+
+          #pdb.set_trace()
+
+          latitude, longitude, date, observer, recorder, siteid = getSiteDetails(siteDetailSheet,workbook)
+
+          glns, wdns, ulns, mlns = gettransectdata(transectNSSheet)
+
+          glse, wdse, ulse, mlse = gettransectdata(transectSENWSheet)
+
+          glne, wdne, ulne, mlne = gettransectdata(transectNESWSheet)
+
+          #pdb.set_trace()
+
+          
+          northSouth = sendToOutput(latitude,longitude,date,siteid,observer,recorder,worksheets[3],glns,wdns,mlns,ulns)
+
+          output.append(northSouth)
+
+          southEast = sendToOutput(latitude,longitude,date,siteid,observer,recorder,worksheets[4],glse,wdse,mlse,ulse)
+          
+          output.append(southEast)
+
+          northEast = sendToOutput(latitude,longitude,date,siteid,observer,recorder,worksheets[5],glne,wdne,mlne,ulne)
+          
+          output.append(northEast)
 
     files = open(cmdargs.outputfile, "w")
+
+    #pdb.set_trace()
 
     for i in output:
         
