@@ -81,55 +81,51 @@ def analysis(data,oldVals,newVals):
 
     for i in range(size):
 
-        
-
-        if i > 0:   # ignore header row       
-
-            intercepts = data.row_values(i,7,107) # get all the intercept row by row
+        intercepts = data.row_values(i,7,107) # get all the intercept row by row
 
             #pdb.set_trace()
-            siteDetails = data.row_values(i,0,7) # get all the site details
+        siteDetails = data.row_values(i,0,7) # get all the site details
 
-            lat = str(siteDetails[0])
+        lat = str(siteDetails[0])
 
-            longt = str(siteDetails[1])
+        longt = str(siteDetails[1])
 
-            date = str(siteDetails[2])
+        date = str(siteDetails[2])
 
-            siteId = siteDetails[3]
+        siteId = siteDetails[3]
 
-            trans = siteDetails[6]
+        trans = siteDetails[6]
 
-            aa = lat + ';' + longt + ';' + date + ';' + siteId + ';'+ trans
+        aa = lat + ';' + longt + ';' + date + ';' + siteId + ';'+ trans
 
-            allSites.append(aa)
+        allSites.append(aa)
 
             
-            interceptOutput = []
+        interceptOutput = []
             
             #pdb.set_trace()
             #loop through each intercept
             
-            for ii in range(len(intercepts)):
+        for ii in range(len(intercepts)):
 
-                aa = str(intercepts[ii])
+            aa = str(intercepts[ii])
 
-                result = replace_all(aa,dictionary)
+            result = replace_all(aa,dictionary)
 
-                result = str(result)
+            result = str(result)
 
                 #pdb.set_trace()
 
                 #result = '"' + result
-              
-                interceptOutput.append(result)
+            
+            interceptOutput.append(result)
                 
                 
             #pdb.set_trace()
 
-            newList = ";".join(interceptOutput)
+        newList = ";".join(interceptOutput)
                 
-            transectOutputs.append(newList)
+        transectOutputs.append(newList)
                     
     
     return transectOutputs, allSites
