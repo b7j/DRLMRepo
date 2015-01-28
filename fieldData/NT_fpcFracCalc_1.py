@@ -103,7 +103,7 @@ def fracAnalysis(result):
 def woodyCoverAnalysis(result,branch):
 
 
-    #pdb.set_trace()
+    pdb.set_trace()
     
     size = result.shape
 
