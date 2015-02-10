@@ -72,8 +72,6 @@ def fracAnalysis(result):
 
     summed.tolist()
 
-    
-
     bare = summed[0] + summed[8] + summed[19] + summed[24] + summed[25] + summed[27] + summed[28]
 
     pV1 = summed[9] + summed[10] + summed[11] + summed[12] + summed[13] + summed[14] + summed[26]
@@ -94,16 +92,13 @@ def fracAnalysis(result):
 
     branch = summed[16] + summed[20]
 
-    
-
-    
-
+  
     return bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch
      
 def woodyCoverAnalysis(result,branch):
 
 
-    pdb.set_trace()
+    #pdb.set_trace()
     
     size = result.shape
 
