@@ -134,7 +134,7 @@ def searchDatabaseScenes(pointDict,timeLag,defStage,winsize):
 
     for stage in ['d%s' % defStage]:
         if stage == 'd%s' % defStage:
-            recallStage = 'd%s' % defStage
+            recallStage = 'd%s' % defStagel 
             data_source = 'usgs'
 
         for key in keys:
