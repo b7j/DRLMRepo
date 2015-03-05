@@ -36,4 +36,4 @@ gdalwarp -of GTiff -cutline DATA/area_of_interest.shp -cl area_of_interest  -cro
 
 qv_dmget.py -l listoffiles --onetape # use this to get all the files from one tape at a time, then run qv_recall_to_pc -l
 
-
+cat images_fullpath.txt | xargs dmls -l > images.dmls-l.txt #run this after running NT_checkTapeStatus.py to get a list of the status of scenes on tape and disk
