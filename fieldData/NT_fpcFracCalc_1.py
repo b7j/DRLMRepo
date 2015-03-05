@@ -109,27 +109,101 @@ def woodyCoverAnalysis(result,branch):
     ppcStage1 = []
 
     ccStage1 = []
+    
+    pv1_2 = []
+    
+    pvT = []
+    
+    npvT = []
+    
+    npv2 = [] 
+    
+    npvWoody_mid_over =[]
+    
+    bareT = []
+    
+    
 
     #loop through the matrix add up each woody component
 
     for i in range(row):
+	    
+	a = result[i,:]
 
-        a = result[i,:]
+        b = a[12] + a[18] + a[22] + a[36] + a[39] #woody green fraction
+	
+	if b > 1:
+		
+		b = 1
 
-        b = a[12] + a[18] + a[22] + a[36] + a[39]
-
-        c = a[12] + a[18] + a[22] + a[36] + a[39] + a[7] + a[16] + a[17] + a[20] + a[21] + a[34] + a[35] + a[37] + a[38]
+        c = a[12] + a[18] + a[22] + a[36] + a[39] + a[7] + a[16] + a[17] + a[20] + a[21] + a[34] + a[35] + a[37] + a[38] #plant projective cover - woody and green
+	
+	if c >1:
+		
+		c = 1
 
         d = a[12] + a[18] + a[22] + a[36] + a[39] + a[7] + a[16] + a[17] + a[20] + a[21] + a[34] + a[35] + a[37] + a[38] + a[15]
+	 #canopy cover - PPC, incrown, mid-incrown
+	 
+	bare = a[0] + a[8] + a[19] + a[24] + a[25] + a[27] + a[28] 
+	
+	
+	 
+	npV1 = a[1] + a[2] + a[3] + a[4] + a[5] + a[6] + a[7] + a[23] + a[30]
+ 	
+	pV1 = a[9] + a[10] + a[11] + a[12] + a[13] + a[14] + a[26]
+	
+	pvtemp = pV1 - c
+	
+	if pvtemp < 0:
+		
+		pvtemp = 0
+	
+	pvtemp2 = pvtemp + b	
+	
+	npvWoody_mid_overTemp = c - b
+	
+	npv2Temp = npV1 - c
+	
+	if npv2Temp <0:
+	
+		npv2Temp = 0
+		
+	npvTTemp = npv2Temp + npvWoody_mid_overTemp
+	
+	bareTTemp = bare - (pvtemp2 + npvTTemp)
+	
+	if bareTTemp <0:
+		
+		bareTTemp = 0
+		
+	pdb.set_trace()
+	
+	bareT.append(bareTTemp)
+	
+	npvT.append(npvTTemp)
+    
+    	npv2.append(npv2Temp)
+    
+    	npvWoody_mid_over.append(npvWoody_mid_overTemp)
+	
+	pv1_2.append(pvtemp)
+	
+	pvT.append(pvtemp2)
 
         fpcStage1.append(b)
 
         ppcStage1.append(c)
 
         ccStage1.append(d)
+	
+	
 
     #Next is to replace all the zero intercepts for each woody component and replace with a 1 for the purpose of removing from the total sum
 
+    #pdb.set_trace()
+    
+    
     fpcStage2 = []
 
     for i in fpcStage1:
@@ -159,11 +233,27 @@ def woodyCoverAnalysis(result,branch):
 
    #sum all the zero hits together
 
+    #pdb.set_trace()
     sumFpc = sum(fpcStage2)
 
     sumPpc = sum(ppcStage2)
 
     sumCc = sum(ccStage2)
+    
+    sumPv1_2 = sum(pv1_2)
+    
+    sumPvT = sum(pvT)
+    
+    sumbareT = sum(bareT)
+    
+    sumnpvT = sum(npvT)
+    
+    sumnpv2 = sum(npv2)
+    
+    sumnpvWMO = sum(npvWoody_mid_over)
+    
+    
+    
 
     #final calculation of each woody component allowing for over topping.
 
@@ -176,16 +266,17 @@ def woodyCoverAnalysis(result,branch):
     ppc = 100 - sumPpc
 
     cc = 100 - sumCc
+    
+    
 
-
-    return fpc1, fpcQ, ppc, cc
+    return fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT
 
     
 
    
     
     
-
+# Analysis builds an array containing the idnividual intercepts
 
 def analysis(data,interUnique):
     
@@ -200,9 +291,9 @@ def analysis(data,interUnique):
 
     for i in range(size):
 
-            #pdb.set_trace()
-
-            intercepts = data.row_values(i,5,105) # get all the intercept row by row
+            
+	    
+	    intercepts = data.row_values(i,5,105) # get all the intercept row by row
 
             result = doTransect(intercepts,interUnique)
 
@@ -212,11 +303,15 @@ def analysis(data,interUnique):
 	    
 	    sites = ','.join(rowStr)
 	    
+	    #pdb.set_trace()
+	    
 	    bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch = fracAnalysis(result)
 	    
-	    fpc1, fpcQ, ppc, cc = woodyCoverAnalysis(result, branch)
+	    fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT = woodyCoverAnalysis(result, branch)
 	    
-	    row = [sites,bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch, fpc1, fpcQ, ppc, cc]
+	    #pdb.set_trace()
+	    
+	    row = [sites,bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch, fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT]
 	    
 	    rowList.append(row)
 	    
