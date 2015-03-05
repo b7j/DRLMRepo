@@ -15,10 +15,10 @@ def getCmdargs():
 
     p = argparse.ArgumentParser()
 
-    p.add_argument("--inputxls", help="Input xls file")
+    p.add_argument("--inputcsv", help="Input csv file")
 
     
-    p.add_argument("--outputfile", help = "output text file")
+    p.add_argument("--outputcsv", help = "output tcsv file")
 
     cmdargs = p.parse_args()
     
@@ -47,6 +47,8 @@ def analysis(data):
         
 
     for i in range(size):
+	    
+	#pdb.set_trace()
 	    
 	siteIds = data.col_values(3,0,size)
 		
@@ -92,17 +94,18 @@ def analysis(data):
 	
 	calcs = []
 	
+	#pdb.set_trace()
+	
 	for m in match:
 		
 		aa = data.row_values(m,5,sizeCols)
 		
 		calcs.append(aa)
 	
+	#pdb.set_trace()
 	
-	avg = np.mean(np.array(calcs), axis = 0)	
-		
-	
-		
+	avg = np.mean(np.array(calcs), axis = 0)			
+			
 	match = list(match)
 		
 	header = data.row_values(match[0],0,4)
@@ -126,7 +129,7 @@ def analysis(data):
 
 def sendToOutput(data,fileName):
 
-
+	
 
     files = open(fileName, "w")
     
