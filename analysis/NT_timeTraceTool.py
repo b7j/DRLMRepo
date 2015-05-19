@@ -38,6 +38,8 @@ def getCmdargs():
     p.add_argument("--instage", help="Stage to process")
 
     p.add_argument("--imagelist", help="List of imagery to process")
+    
+    p.add_argument("--imagepath", help="Path to imagery")
 
     p.add_argument("--vector", help="Vector data for zonal stats")
 
@@ -68,30 +70,32 @@ def mainRoutine():
 
     cmdargs = getCmdargs() # instantiate the get command line function
 
-    imagepath = cmdargs.imagelist #get the image path from the get cmd
-
-    pattern = "*_%sm?_zstdmasks.img" % cmdargs.instage # create a file stage pattern to search for.
+    imagelist = cmdargs.imagelist #get the image path from the get cmd
+    
+    filelist = []
+    
+    with open(imagelist, "r") as ifile:
+	
+	for line in ifile:
+		
+		#pdb.set_trace()
+		
+		lineA = line.rstrip()
+		
+		lineB = lineA.strip('\n')
+		
+		path = cmdargs.imagepath + lineB
+		
+		filelist.append(path)
+		
+		
+	
 
     #pdb.set_trace()
-
-    newpattern = imagepath + pattern # add the image path the pattern
-
-    filelist = glob.glob(newpattern)# filter the image directory for the chosen stage
-      
+    
     filelist.sort(key=lambda x: x.split("_", 2)[-1]) # sort the filtered list on image date.
 
-    '''
-    if any("zstdmasks" in s for s in filelist):
-
-        pattern = "*_%sm?_zstdmasks.img" % cmdargs.instage # create a file stage pattern to search for.
-
-        newpattern = imagepath + pattern # add the image path the pattern
-
-        filelist = glob.glob(newpattern)# filter the image directory for the chosen stage
-      
-        filelist.sort(key=lambda x: x.split("_", 2)[-1]) # sort the filtered list on image date.
-
-    '''
+    
     
     #setup some output lists
 
@@ -124,55 +128,23 @@ def mainRoutine():
 
         counter += 1 # add one to the counter
 
-        #pdb.set_trace()
+        
+	
+	#filename = filename[-33:]
 
         print str(counter) + ' of ' + str(len(filelist)) # print the counter 
 
         csvfile = "temp.csv" 
 
-        if 'zstdmasks' in filename:
+        imagename = filename[-34:] 
 
-            a = filename[-48:] 
+        season = filename[-22:-10]
+	
+	#pdb.set_trace()
 
-            b = filename[-28:-20]
+        cmd = "qv_rastbypoly.py -r %s -v %s -c %s -o %s --doheadings --stats count,nullcount,min,max,mean,stddev" % (filename, cmdargs.vector, cmdargs.uid, csvfile) # call raster by poly
 
-            year =int(b[0:4])
-
-            month = int(b[4:6])
-
-            day = int(b[6:])
-
-            date = datetime.datetime(year,month,day) # create a date object from the filename dates
-
-            cmd = "qv_rastbypoly.py -r %s -v %s -c %s -o %s --doheadings --stats count,nullcount,min,max,mean,stddev" % (filename, cmdargs.vector, cmdargs.uid, csvfile) # call raster by poly
-
-            os.system(cmd) # call it
-
-           
-
-        else:
-
-            a = filename[-34:] 
-
-            b = filename[-18:-10]
-
-            year = int(b[0:4])
-
-            month = int(b[4:6])
-
-            day = int(b[6:])
-
-            date = datetime.datetime(year,month,day) # create a date object from the filename dates
-
-            stdmasked = qvf.changeoptionfield(filename, 'z', 'stdmasks') # changesone of the options in the standard mask call
-
-            cmd = "qv_applystdmasks.py --infile %s --outfile %s" % (filename, stdmasked) # call the standard mask
-        
-            os.system(cmd) #call it
-
-            cmd = "qv_rastbypoly.py -r %s -v %s -c %s -o %s --doheadings --stats count,nullcount,min,max,mean,stddev" % (stdmasked, cmdargs.vector, cmdargs.uid, csvfile) # call raster by poly
-
-            os.system(cmd) # call it
+        os.system(cmd) # call it
         
             #pdb.set_trace()
         
@@ -182,7 +154,7 @@ def mainRoutine():
 
         iteration = 0 
 
-        
+        #pdb.set_trace()
  
         for row in reader: # loop through the temp csv file
             
@@ -195,16 +167,10 @@ def mainRoutine():
 
             if iteration == 1 and counter == 1: #test to get the header row of the csv file for the output csv
 
-                row.append('date')
-
                 row.append('imageName')
 
-                row.append('year')
-
-                row.append('month')
-
-                row.append('day')
-
+                row.append('season')
+                
                 outputlist.append(row) # append to the output list
             
             none = row[3:4]
@@ -227,19 +193,13 @@ def mainRoutine():
                  #print str(nulls)
                                 
 
-                 row.append(date) #append date to end of row
+                 row.append(imagename) #append date to end of row
 
-                 row.append(a) #append image name to end of row
-
-                 row.append(year)
-
-                 row.append(month)
-
-                 row.append(day)
+                 row.append(season) #append image name to end of row
 
                  outputlist.append(row) # append to the output list for csv output.
 
-                 imdate.append(date)
+                 #imdate.append(date)
 
                  objectId.append(row[0])
                 

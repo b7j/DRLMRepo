@@ -9,6 +9,7 @@ import pdb
 import xlrd
 import re
 import numpy as np
+import csv
 
 #function to get cmd line inputs
 def getCmdargs():
@@ -177,7 +178,7 @@ def woodyCoverAnalysis(result,branch):
 		
 		bareTTemp = 0
 		
-	pdb.set_trace()
+	#pdb.set_trace()
 	
 	bareT.append(bareTTemp)
 	
@@ -272,9 +273,6 @@ def woodyCoverAnalysis(result,branch):
     return fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT
 
     
-
-   
-    
     
 # Analysis builds an array containing the idnividual intercepts
 
@@ -285,7 +283,11 @@ def analysis(data,interUnique):
     
     rowList = []
     
+    keyNames = 'lat,long,date,siteId,transect,bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch, fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT'
     
+    keyNames1 = keyNames.split(',')
+    
+    dictionary = dict.fromkeys(keyNames1, 0)
     
         
 
@@ -299,19 +301,39 @@ def analysis(data,interUnique):
 
             siteDetails = data.row_values(i,0,5) # get all the site details
 	    
-	    rowStr = [str(x) for x in siteDetails]
-	    
-	    sites = ','.join(rowStr)
-	    
 	    #pdb.set_trace()
+	    
+	    lat = data.row_values(i,0,1)
+	    
+	    lat = lat[0]
+	    
+	    longt = data.row_values(i,1,2)
+	    
+	    longt = longt[0]
+	    
+	    date = data.row_values(i,2,3)
+	    
+	    date = date[0]
+	    
+	    siteId = data.row_values(i,3,4)
+	    
+	    siteId = siteId[0]
+	    
+	    trans = data.row_values(i,4,5)
+	    
+	    trans = trans[0]
+	   	    
+	   
+	        
+	    pdb.set_trace()
 	    
 	    bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch = fracAnalysis(result)
 	    
 	    fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT = woodyCoverAnalysis(result, branch)
 	    
-	    #pdb.set_trace()
+	    row = [lat,longt,date,siteId,trans,bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch, fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT]
 	    
-	    row = [sites,bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch, fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT]
+	    
 	    
 	    rowList.append(row)
 	    
@@ -320,7 +342,7 @@ def analysis(data,interUnique):
     
     
            
-    return rowList
+    return rowList, keyNames1
                                 
     
 
@@ -338,31 +360,26 @@ def getLookUp(data):
 
 
 
-def sendToOutput(data,fileName):
+def sendToOutput(myDict,fileName):
 
-
-
-    files = open(fileName, "w")
-    
-    for row in data:
-	    
-	#pdb.set_trace()
+        with open(fileName, 'w') as f:
 	
-	rowStr = [str(x) for x in row]
-	
-	sites = ','.join(rowStr)
-	
-	files.write(sites + '\n')
-    
-    files.close()
-  
-   
-
-
-
+		writer = csv.writer(f)  
+		  
+		for k,v in myDict.iteritems():
+			
+			writer.writerow([k] + v)               
+		       
+		       
+		       
+		       
+		       
+		       
+		       
+		       
 def mainRoutine():
 
-    cmdargs = getCmdargs() # instantiate the get command line function
+    cmdargs = getCmdargs() # instantiate the get command line function        
 
     # open the spreadsheet with transect data
 
@@ -393,15 +410,33 @@ def mainRoutine():
     
     #pdb.set_trace()
 
-    rowList = analysis(data,interUnique)
-
+    rowList, keys = analysis(data,interUnique)
+        
+    newDict = dict()
     
-       
+    #newDict.fromkeys(keys, 0)
+    
+    #pdb.set_trace()
+    
+    for row in rowList:
+	    
+	    #pdb.set_trace()
+	    
+	    for i in range(len(row)):
+		    
+		    k = keys[i]
+		    
+		    r = row[i]
+		    
+		    newDict.setdefault(k, [])
+		    	    
+	    	    newDict[k].append(r)
+	               
     #pdb.set_trace()
 
     fileName = cmdargs.outputfile
 
-    sendToOutput(rowList,fileName)
+    sendToOutput(newDict,fileName)
     
 
     
