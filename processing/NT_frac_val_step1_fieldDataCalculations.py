@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+'''
+
+./NT_frac_val_step1_fieldDataCalculations.py --inputxls /scratch/rsc5/jason/validation/Calculations/AllSitesStandardised2801pm.xls --inputlookup /scratch/rsc5/jason/validation/Calculations/uniqueList.xls --outputfile Step1FieldDataCalcs.csv 
+
+'''
+
 
 # get all the imports
 import sys
@@ -20,7 +26,7 @@ def getCmdargs():
 
     p.add_argument("--inputlookup", help="Input xls file")
 
-    p.add_argument("--outputfile", help = "output text file")
+    p.add_argument("--outputfile", help = "output csv file")
 
     cmdargs = p.parse_args()
     
@@ -38,13 +44,9 @@ def doTransect(data,interUnique):
 
     newArray = np.zeros((len(data),len(interUnique)))
 
-    
+    #pdb.set_trace()
 
     for i in range(len(data)): # each intercept
-
-       #pdb.set_trace()
-
-       
 
        b = data[i].split(',')
        
@@ -60,24 +62,110 @@ def doTransect(data,interUnique):
 
                   newArray[i,iii] = 1
 
-                  
-
-                 
     return newArray                              
+    
+def gapFracAnalysis(result):
+	
+	#as per Peter Scarth's Gap Fraction Analysis
+	
+	summed = np.sum(result,0)
+	
+	summed.tolist()
+	
+	nTotal = 100 #this is set 100 as all our sites have been cleaned to ensure 100 intercepts per transect
+	
+	#down
+		
+	bare = summed[0] + summed[8] + summed[19] + summed[25] + summed[27] + summed[28] # note removed crypto & added to npV1
+	
+	pV1 = summed[9] + summed[10] + summed[11] + summed[12] + summed[13] + summed[14] + summed[26]
+	
+	npV1 = summed[1] + summed[2] + summed[3] + summed[4] + summed[5] + summed[6] + summed[7] + summed[23] + summed[30] + summed[24]
+	
+	#pdb.set_trace()
+	
+	#over
+	
+	nCanopyGreen = (summed[22] + summed[36])*nTotal/100
+	
+	nCanopyDead = (summed[21]+ summed[35])*nTotal/100
+	
+	nCanopyBranch = (summed[20] + summed[34])*nTotal/100
+	
+	nMidGreen = (summed[18] + summed[39])*nTotal/100
+	
+	nMidDead = (summed[17] + summed[38])*nTotal/100
+	
+	nMidBranch = summed[16]*nTotal/100
+		
+	
+	
+	nGroundCrustDistRock = bare*nTotal/100
+	
+	nGroundGreen = pV1*nTotal/100
+	
+	nGroundDeadLitter= npV1*nTotal/100
+	
+	canopyFoliageProjectiveCover=nCanopyGreen/(nTotal-nCanopyBranch)
+	canopyDeadProjectiveCover=nCanopyDead/(nTotal-nCanopyBranch)
+	canopyBranchProjectiveCover=nCanopyBranch/nTotal*(1-canopyFoliageProjectiveCover-canopyDeadProjectiveCover)
+	canopyPlantProjectiveCover=(nCanopyGreen+nCanopyDead+nCanopyBranch)/nTotal
+	
+	midFoliageProjectiveCover=nMidGreen/nTotal
+	midDeadProjectiveCover=nMidDead/nTotal
+	midBranchProjectiveCover=nMidBranch/nTotal
+	midPlantProjectiveCover=(nMidGreen+nMidDead+nMidBranch)/nTotal
+	
+	satMidFoliageProjectiveCover=midFoliageProjectiveCover*(1-canopyPlantProjectiveCover)
+	satMidDeadProjectiveCover=midDeadProjectiveCover*(1-canopyPlantProjectiveCover)
+	satMidBranchProjectiveCover=midBranchProjectiveCover*(1-canopyPlantProjectiveCover)
+	satMidPlantProjectiveCover=midPlantProjectiveCover*(1-canopyPlantProjectiveCover)
+	
+	groundPVCover=nGroundGreen/nTotal
+	groundNPVCover=nGroundDeadLitter/nTotal
+	groundBareCover=nGroundCrustDistRock/nTotal
+	groundTotalCover=(nGroundGreen+nGroundDeadLitter+nGroundCrustDistRock)/nTotal
+	
+	#pdb.set_trace()
+	
+	satGroundPVCover=groundPVCover*(1-midPlantProjectiveCover)*(1-canopyPlantProjectiveCover)
+	satGroundNPVCover=groundNPVCover*(1-midPlantProjectiveCover)*(1-canopyPlantProjectiveCover)
+	satGroundBareCover=groundBareCover*(1-midPlantProjectiveCover)*(1-canopyPlantProjectiveCover)
+	satGroundTotalCover=groundTotalCover*(1-midPlantProjectiveCover)*(1-canopyPlantProjectiveCover)
+	
+	satGroundPVCover= satGroundPVCover + canopyPlantProjectiveCover + midPlantProjectiveCover
+	satGroundTotalCover= satGroundPVCover + satGroundNPVCover + satGroundBareCover
+		
+	totalPVCover=canopyFoliageProjectiveCover+satMidFoliageProjectiveCover+satGroundPVCover
+	totalNPVCover=canopyDeadProjectiveCover+canopyBranchProjectiveCover+satMidDeadProjectiveCover+satMidBranchProjectiveCover+satGroundNPVCover
+	totalBareCover=satGroundBareCover
+	
+	# Round things back to 0 to 100
+	satGroundPVCover = satGroundPVCover*100
+	satGroundNPVCover = satGroundNPVCover*100
+	satGroundBareCover = satGroundBareCover*100
+	satGroundTotalCover = satGroundTotalCover*100
+	
+	totalPVCover = totalPVCover*100
+	totalNPVCover = totalNPVCover*100
+	totalBareCover = totalBareCover*100
+
+	return totalPVCover,totalNPVCover,totalBareCover,satGroundPVCover,satGroundNPVCover,satGroundBareCover,satGroundTotalCover
+    
     
 def fracAnalysis(result):
 
-    #pdb.set_trace()
+    #This is the basic fractional analysis calculation
 
     summed = np.sum(result,0)
 
     summed.tolist()
 
-    bare = summed[0] + summed[8] + summed[19] + summed[24] + summed[25] + summed[27] + summed[28]
+    bare = summed[0] + summed[8] + summed[19] + summed[25] + summed[27] + summed[28]
 
     pV1 = summed[9] + summed[10] + summed[11] + summed[12] + summed[13] + summed[14] + summed[26]
 
-    npV1 = summed[1] + summed[2] + summed[3] + summed[4] + summed[5] + summed[6] + summed[7] + summed[23] + summed[30]
+    npV1 = summed[1] + summed[2] + summed[3] + summed[4] + summed[5] + summed[6] + summed[7] + summed[23] + summed[24] + summed[30]
 
     bal =  summed[2] + summed[3] + summed[4] + summed[5] + summed[6] + summed[7] + summed[30] + summed[34] + summed[35] # Brown Attached Leaf
 
@@ -99,7 +187,7 @@ def fracAnalysis(result):
 def woodyCoverAnalysis(result,branch):
 
 
-    #pdb.set_trace()
+    #This step calcluates the woody components and adjusts the fractional cover based on an overtopping logic
     
     size = result.shape
 
@@ -270,7 +358,7 @@ def woodyCoverAnalysis(result,branch):
     
     
 
-    return fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT
+    return fpc1,fpcQ,ppc,cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT
 
     
     
@@ -283,7 +371,7 @@ def analysis(data,interUnique):
     
     rowList = []
     
-    keyNames = 'lat,long,date,siteId,transect,bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch, fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT'
+    keyNames = 'lat,long,date,siteId,transect,bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch, fpc1, fpcQ, ppc, cc,satBARE_NT,satNPV_NT,sumnpv2,sumnpvWMO,sumPv1_2,satPV_NT,totalPVCoverQLD,totalNPVCoverQLD,totalBareCoverQLD,satGroundPVCoverQLD,satGroundNPVCoverQLD,satGroundBareCoverQLD,satGroundTotalCoverQLD'
     
     keyNames1 = keyNames.split(',')
     
@@ -293,7 +381,7 @@ def analysis(data,interUnique):
 
     for i in range(size):
 
-            
+            #i = 2499
 	    
 	    intercepts = data.row_values(i,5,105) # get all the intercept row by row
 
@@ -325,13 +413,15 @@ def analysis(data,interUnique):
 	   	    
 	   
 	        
-	    pdb.set_trace()
+	    #pdb.set_trace()
 	    
 	    bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch = fracAnalysis(result)
 	    
 	    fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT = woodyCoverAnalysis(result, branch)
 	    
-	    row = [lat,longt,date,siteId,trans,bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch, fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT]
+	    totalPVCover,totalNPVCover,totalBareCover,satGroundPVCover,satGroundNPVCover,satGroundBareCover,satGroundTotalCover = gapFracAnalysis(result)
+	    
+	    row = [lat,longt,date,siteId,trans,bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch, fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT,totalPVCover,totalNPVCover,totalBareCover,satGroundPVCover,satGroundNPVCover,satGroundBareCover,satGroundTotalCover]
 	    
 	    
 	    
