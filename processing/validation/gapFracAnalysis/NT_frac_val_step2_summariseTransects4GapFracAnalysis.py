@@ -6,6 +6,11 @@ This script gets teh output from step 1 and summarises it into a site by site fo
 
 The output then needs to be intersected with a shapefile of lands 
 
+./NT_frac_val_step2_summariseTransects.py --inputcsv outputTest.csv --outputcsv summarised.csv
+
+
+
+
 '''
 
 # get all the imports
@@ -60,7 +65,7 @@ def analysis(data):
     
     dates = data['date']
     
-    trans = data['transect']
+    #trans = data['trans']
     
     keys = data.keys()
     
@@ -137,8 +142,11 @@ def analysis(data):
 				aa = data[item]
 				
 				vals = []
+				print item
 				
-				if item == 'transect':
+				#item = 'transect'
+				
+				if item == 'trans':
 					
 					print 'skipping over transect text'
 				
@@ -182,6 +190,8 @@ def analysis(data):
 					
 					for m in match:
 						
+						#pdb.set_trace()
+						
 						v = float(aa[m])
 						
 						vls.append(v)
@@ -190,9 +200,74 @@ def analysis(data):
 									
 					newDict[item].append(e)
 				
+					newDict.setdefault(item + '_sum', [])
+										
+					vls = []
+					
+					#pdb.set_trace()	
+					
+					for m in match:
+						
+						#pdb.set_trace()
+						
+						v = float(aa[m])
+						
+						vls.append(v)
+								
+					e = np.sum(vls)				
+					#pdb.set_trace()				
+					newDict[item +'_sum'].append(e)
+    #pdb.set_trace()
+    			
+    a = np.array(newDict['bare_sum']) + np.array(newDict['pV2_sum']) + np.array(newDict['npV2_sum']) + np.array( newDict['cryp_sum'])
+    
+    
+    
+    newDict.setdefault('nTotal', [])
+    
+    for n in a:
+	    
+	    newDict['nTotal'].append(n)
+    
 	
     	
+    newBare = np.array(newDict['bare_sum'])/np.array(newDict['nTotal'])*100
+    
+    newDict.setdefault('newBare', [])
+    
+    for n in newBare:
+	    
+	    newDict['newBare'].append(n)
+    
+    newCryp = np.array(newDict['cryp_sum'])/np.array(newDict['nTotal'])*100
+    
+    newDict.setdefault('newCryp', [])
+    
+    for n in newCryp:
+	    
+	    newDict['newCryp'].append(n)
+    
 	
+    
+    newNPV = np.array(newDict['npV2_sum'])/np.array(newDict['nTotal'])*100
+    
+    newDict.setdefault('newNPV', [])
+    
+    for n in newNPV:
+	    
+	    newDict['newNPV'].append(n)
+    
+    
+    newPV = np.array(newDict['pV2_sum'])/np.array(newDict['nTotal'])*100
+    
+    
+    newDict.setdefault('newPV', [])
+    
+    for n in newPV:
+	    
+	    newDict['newPV'].append(n)
+    
+    
     return newDict
                                 
     
@@ -232,13 +307,15 @@ def mainRoutine():
     
     #pdb.set_trace()
 
-    averaged = analysis(myDict)
+    result = analysis(myDict)
 
     #pdb.set_trace()
+    
+    
 
     fileName = cmdargs.outputcsv
 
-    sendToOutput(averaged,fileName)
+    sendToOutput(result,fileName)
     
 
     

@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+'''
+
+./NT_frac_val_step1_fieldDataCalculations.py --inputxls /scratch/rsc5/jason/validation/Calculations/AllSitesStandardised2801pm.xls --inputlookup /scratch/rsc5/jason/validation/Calculations/uniqueList.xls --outputfile Step1FieldDataCalcs.csv 
+
+'''
+
 
 # get all the imports
 import sys
@@ -20,7 +26,7 @@ def getCmdargs():
 
     p.add_argument("--inputlookup", help="Input xls file")
 
-    p.add_argument("--outputfile", help = "output text file")
+    p.add_argument("--outputfile", help = "output csv file")
 
     cmdargs = p.parse_args()
     
@@ -38,13 +44,9 @@ def doTransect(data,interUnique):
 
     newArray = np.zeros((len(data),len(interUnique)))
 
-    
+    #pdb.set_trace()
 
     for i in range(len(data)): # each intercept
-
-       #pdb.set_trace()
-
-       
 
        b = data[i].split(',')
        
@@ -60,24 +62,24 @@ def doTransect(data,interUnique):
 
                   newArray[i,iii] = 1
 
-                  
-
-                 
     return newArray                              
+    
+
+    
     
 def fracAnalysis(result):
 
-    #pdb.set_trace()
+    #This is the basic fractional analysis calculation
 
     summed = np.sum(result,0)
 
     summed.tolist()
 
-    bare = summed[0] + summed[8] + summed[19] + summed[24] + summed[25] + summed[27] + summed[28]
+    bare = summed[0] + summed[8] + summed[19] + summed[25] + summed[27] + summed[28]
 
     pV1 = summed[9] + summed[10] + summed[11] + summed[12] + summed[13] + summed[14] + summed[26]
 
-    npV1 = summed[1] + summed[2] + summed[3] + summed[4] + summed[5] + summed[6] + summed[7] + summed[23] + summed[30]
+    npV1 = summed[1] + summed[2] + summed[3] + summed[4] + summed[5] + summed[6] + summed[7] + summed[23] + summed[24] + summed[30]
 
     bal =  summed[2] + summed[3] + summed[4] + summed[5] + summed[6] + summed[7] + summed[30] + summed[34] + summed[35] # Brown Attached Leaf
 
@@ -99,7 +101,7 @@ def fracAnalysis(result):
 def woodyCoverAnalysis(result,branch):
 
 
-    #pdb.set_trace()
+    #This step calcluates the woody components and adjusts the fractional cover based on an overtopping logic
     
     size = result.shape
 
@@ -270,7 +272,7 @@ def woodyCoverAnalysis(result,branch):
     
     
 
-    return fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT
+    return fpc1,fpcQ,ppc,cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT
 
     
     
@@ -283,7 +285,7 @@ def analysis(data,interUnique):
     
     rowList = []
     
-    keyNames = 'lat,long,date,siteId,transect,bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch, fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT'
+    keyNames = 'lat,long,date,siteId,transect,bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch, fpc1, fpcQ, ppc, cc,satBARE_NT,satNPV_NT,sumnpv2,sumnpvWMO,sumPv1_2,satPV_NT'
     
     keyNames1 = keyNames.split(',')
     
@@ -293,7 +295,7 @@ def analysis(data,interUnique):
 
     for i in range(size):
 
-            
+            #i = 2499
 	    
 	    intercepts = data.row_values(i,5,105) # get all the intercept row by row
 
@@ -325,12 +327,13 @@ def analysis(data,interUnique):
 	   	    
 	   
 	        
-	    pdb.set_trace()
+	    #pdb.set_trace()
 	    
 	    bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch = fracAnalysis(result)
 	    
 	    fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT = woodyCoverAnalysis(result, branch)
 	    
+	    	    
 	    row = [lat,longt,date,siteId,trans,bare, pV1, npV1, bal, bdl, bareSoil, agg, cryp, ash, branch, fpc1, fpcQ, ppc, cc,sumbareT,sumnpvT,sumnpv2,sumnpvWMO,sumPv1_2,sumPvT]
 	    
 	    

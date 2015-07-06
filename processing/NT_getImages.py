@@ -17,6 +17,8 @@ def getCmdargs():
     p.add_argument("--path", type=int, help="path, ie 102")
     p.add_argument("--row", type=int, help="row, ie 77")
     p.add_argument("--stage", help = "processing stage, ie dil")
+    p.add_argument("--destDir", help = "destination directory")
+    
     cmdargs = p.parse_args()
     if cmdargs.path is None:
         p.print_help()
@@ -42,16 +44,19 @@ def getImageNames(cmdargs):
     DBcursor = DBcon.cursor()
     DBcursor.execute(sql)
     results = DBcursor.fetchall()
-    
+    #pdb.set_trace()
     fileList = []
     for (sat, instr, date) in results:
-        filename = "%s%sre_%s_%s_%smz.img" % (sat, instr, scene, date, cmdargs.stage)
+	
+	newDate = date[0:4]
+        filename = "lztmre_%s_%s_%sm3.img" % (scene, newDate, cmdargs.stage)
         # Use the database to get the right projection code for this scene
         filename = metadb.stdProjFilename(filename, cursor=DBcursor)
         fileList.append(filename)
     
     return fileList
     
+    #pdb.set_trace()
 
 def main():
     """
@@ -62,8 +67,16 @@ def main():
     #pdb.set_trace()
 
     fileNameList = getImageNames(cmdargs)
-    print "Recalling", len(fileNameList), "files"
-    qv.recallToHere(fileNameList)
+    
+    a= set(fileNameList)
+    
+    fileNameList = list(a)
+        
+    for f in fileNameList:
+	    
+	    cmd = "qv_recall_to_pc --destdir %s %s" % (cmdargs.destDir, f) # call the standard mask
+        
+            os.system(cmd) 
 
 
 if __name__ == "__main__":
