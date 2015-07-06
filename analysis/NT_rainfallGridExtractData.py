@@ -245,23 +245,17 @@ def doRegionAnalysis(results):
 						
 			newDict['longterm_upper'].append(upper)
 			
-			lowerMidDiff = (mid - lower) / 2
-						
-			upperMidDiff = (upper - mid) / 2
 			
-			lowerMidPoint = lower + lowerMidDiff
 			
-			upperMidPoint = mid + upperMidDiff
-			
-			if currentAvg > int(upperMidPoint):
+			if currentAvg > mid:
 				
 				newDict['seasonalityScore'].append(3)
 				
-			elif currentAvg < int(upperMidPoint) and currentAvg > int(lowerMidPoint):
+			elif currentAvg < mid and currentAvg > lower:
 				
 				newDict['seasonalityScore'].append(2)
 				
-			elif currentAvg < int(lowerMidPoint):
+			elif currentAvg < lower:
 				
 				newDict['seasonalityScore'].append(1)
 				
@@ -294,6 +288,9 @@ def main():
     analysisResults = doRegionAnalysis(results)
     
     #pdb.set_trace()
+    fileName = "/scratch/rsc5/jason/regionalAnalysis/rainfall/all.csv"
+    
+    sendToOutput(results,fileName)
     
     sendToOutput(analysisResults,cmdargs.outputfile)
 
