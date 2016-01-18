@@ -97,9 +97,11 @@ def doConversion(directoryList,outDir):
 		
 		out = out[-13:-7]
 		
-		out = outDir + out + '.HFA'
+		out = outDir + out + '.img'
+		
+		nodata = -1
 
-        	cmd = "gdal_translate %s %s" % (i,out) 
+        	cmd = "gdal_translate -of %s -a_nodata %s %s %s" % ('HFA',nodata,i,out) 
 
         	os.system(cmd) # call it
         

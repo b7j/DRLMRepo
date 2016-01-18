@@ -43,6 +43,7 @@ def main():
     controls.setCreationOptions(options)                                      
     controls.setWindowXsize(256) #set the rios block size to match the tiff tile size
     controls.setWindowYsize(256)
+    controls.setStatsIgnore(255)
 
     infiles.inFrac = cmdargs.inFrac
     infiles.inDec = cmdargs.inDecile
@@ -54,8 +55,6 @@ def main():
 # function to do the drill down through the image stack 
 def doAnalysis(info, inputs, outputs):
 
-    #pdb.set_trace()
-        
     frac = np.array(inputs.inFrac)
     
     pv = np.array(inputs.inFrac[1])
@@ -64,29 +63,46 @@ def doAnalysis(info, inputs, outputs):
     
     totalGc = (pv + npv)-200 #okay
     
+    totalGc = totalGc.astype(np.uint8)
+    
     bare = np.array(inputs.inFrac[0])-100 #okay
+    
+    bare = bare.astype(np.uint8)
     
     decileTgc = np.array(inputs.inDec[0])*10
     
-    #decileBare = (np.array(abs(inputs.inDec[0])-10))
-    #pdb.set_trace()
+    decileTgc = decileTgc.astype(np.uint8)
     
     decile = np.array(inputs.inDec[0])
     
     decile = decile.astype(np.float)
     
+    decileTest = decile == 0
+    
+    decile[decileTest] = 255
+    
     decileBare = np.array(abs(decile-10))
     
+    decile = decile.astype(np.uint8)
+    
     decileBare = decileBare * 10
+    
+    #pdb.set_trace()
+    
+    decileBare = decileBare.astype(np.uint8)
+    
         
-    decileBare = decileBare.astype(np.int8)
+    #decileBare = decileBare.astype(np.int8)
     
     output = np.array([bare,totalGc,decileTgc,decileBare])
+    
+    #pdb.set_trace()
+    
+    #output = output.astype(np.int8)
 
     outputs.comp = output #write to output array
-   
-  
-
+    
 
 if __name__ == "__main__":
+    
     main()
